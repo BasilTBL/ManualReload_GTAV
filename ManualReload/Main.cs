@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 using GTA;
 using GTA.Native;
 using GTA.UI;
-using System.Media;
-using System.IO;
-using System.Reflection;
-using GTA.Math;
-using System.Linq;
-using System.Diagnostics.Eventing.Reader;
-using System.Security.Permissions;
 
 
 public class ManualReload : Script
@@ -29,7 +21,6 @@ public class ManualReload : Script
     bool bAddedBullet = false;
     public List<int> IsGunEmpty = new List<int>();
     public int soundCounter = 0;
-
 
 
     public void OnTick(object sender, EventArgs e)
