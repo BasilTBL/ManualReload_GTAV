@@ -103,7 +103,7 @@ public class ManualReload : Script
     // audio
     private void PlaySound()
     {
-        uint WeaponType = Function.Call<uint>(Hash.GET_WEAPONTYPE_GROUP, (uint)Game.Player.Character.Weapons.Current.Hash);
+        int WeaponType = Function.Call<int>(Hash.GET_WEAPONTYPE_GROUP, (int)Game.Player.Character.Weapons.Current.Hash);
 
         try
         {
