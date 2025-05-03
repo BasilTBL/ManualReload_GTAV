@@ -32,56 +32,62 @@ public class ManualReload : Script
         }
         */
 
-        // if player is holding a proper gun and bullet hasnt been added yet add bullet
-        if (Game.Player.Character.Weapons.Current.MaxAmmoInClip > 2 && bAddedBullet == false)
+        // turn off when in vehicle (forgot, oops)
+        if (!Game.Player.Character.IsInVehicle())
         {
-            if (Game.Player.Character.Weapons.Current.AmmoInClip == 1)
+            // if player is holding a proper gun and bullet hasnt been added yet add bullet
+            if (Game.Player.Character.Weapons.Current.MaxAmmoInClip > 2 && bAddedBullet == false)
             {
-                Game.Player.Character.Weapons.Current.AmmoInClip = 2;
-                bAddedBullet = true;
-            }
-        } // else if players gun is empty and bullet has been added disable attack
-        else if (Game.Player.Character.Weapons.Current.AmmoInClip == 1 && bAddedBullet == true)
-        {
-            Function.Call(Hash.DISABLE_CONTROL_ACTION, 0, GTA.Control.Attack, true);
-            Function.Call(Hash.DISABLE_CONTROL_ACTION, 0, GTA.Control.Attack2, true);
-            // if gun has not been added to the emptygun list add it
-            if (!IsGunEmpty.Contains((int)Game.Player.Character.Weapons.Current.Hash))
+                if (Game.Player.Character.Weapons.Current.AmmoInClip == 1)
+                {
+                    Game.Player.Character.Weapons.Current.AmmoInClip = 2;
+                    bAddedBullet = true;
+                }
+            } // else if players gun is empty and bullet has been added disable attack
+            else if (Game.Player.Character.Weapons.Current.AmmoInClip == 1 && bAddedBullet == true)
             {
-                IsGunEmpty.Add((int)Game.Player.Character.Weapons.Current.Hash);
+                Function.Call(Hash.DISABLE_CONTROL_ACTION, 0, GTA.Control.Attack, true);
+                Function.Call(Hash.DISABLE_CONTROL_ACTION, 0, GTA.Control.Attack2, true);
+                // if gun has not been added to the emptygun list add it
+                if (!IsGunEmpty.Contains((int)Game.Player.Character.Weapons.Current.Hash))
+                {
+                    IsGunEmpty.Add((int)Game.Player.Character.Weapons.Current.Hash);
+                }
             }
+
+            // if the gun is in the emptygun list and player isnt reloading set the ammo to 1
+            if (IsGunEmpty.Contains((int)Game.Player.Character.Weapons.Current.Hash) && !Game.Player.Character.IsReloading)
+            {
+                Game.Player.Character.Weapons.Current.AmmoInClip = 1;
+            }
+
+            // if gun has reloaded reset the bullet pool and remove it from emptygun list
+            if (Game.IsControlJustReleased(GTA.Control.Reload))
+            {
+                IsGunEmpty.Remove((int)Game.Player.Character.Weapons.Current.Hash);
+                bAddedBullet = false;
+            }
+
+
+            // play dry fire sound on empty mag
+            if (Function.Call<bool>(Hash.IS_DISABLED_CONTROL_JUST_PRESSED, 1, GTA.Control.Attack2) && Game.Player.Character.Weapons.Current.AmmoInClip == 1 && Game.Player.Character.IsAiming)
+            {
+                if (soundCounter > 17)
+                {
+                    PlaySound();
+                    soundCounter = 0;
+                }
+            }
+            soundCounter++;
+
         }
 
-        // if the gun is in the emptygun list and player isnt reloading set the ammo to 1
-        if (IsGunEmpty.Contains((int)Game.Player.Character.Weapons.Current.Hash) && !Game.Player.Character.IsReloading)
-        {
-            Game.Player.Character.Weapons.Current.AmmoInClip = 1;
-        }
-
-        // if gun is full reset the added bullet bool
+        // if gun is full reset the added bullet bool and remove from list (fix for exiting vehicles with full gun)
         if (Game.Player.Character.Weapons.Current.AmmoInClip == Game.Player.Character.Weapons.Current.MaxAmmoInClip)
         {
             bAddedBullet = false;
-        }
-
-        // if gun has reloaded reset the bullet pool and remove it from emptygun list
-        if (Game.IsControlJustReleased(GTA.Control.Reload))
-        {
             IsGunEmpty.Remove((int)Game.Player.Character.Weapons.Current.Hash);
-            bAddedBullet = false;
         }
-
-
-        // play dry fire sound on empty mag
-        if (Function.Call<bool>(Hash.IS_DISABLED_CONTROL_JUST_PRESSED, 1, GTA.Control.Attack2) && Game.Player.Character.Weapons.Current.AmmoInClip == 1 && Game.Player.Character.IsAiming)
-        {
-            if (soundCounter > 17)
-            {
-                PlaySound();
-                soundCounter = 0;
-            }
-        }
-        soundCounter++;
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)
